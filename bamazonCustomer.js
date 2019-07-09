@@ -9,6 +9,8 @@ var connection = mysql.createConnection({
     database: "bamazon"
 });
 
+customerView();
+
 function openConnection() {
     connection.connect(function(err) {
         if (err) throw err;
@@ -20,10 +22,10 @@ function closeConnection() {
     connection.end();
 }
 
-function showAllItems () {
+function customerView () {
     openConnection();
     let querySQL = 'SELECT item_id, product_name, price FROM products';
-    connection.query(querySQL, function(e, r) {
+    connection.query(querySQL, (e, r) => {
         if (e) throw e;
         let msg = '';
         // console.log(r);
@@ -43,9 +45,9 @@ function showAllItems () {
             console.log (msg);
         }
         console.log('\n');
-        customerInput();
+        customerSelect();
     });
-    closeConnection();
+    
 }
 
 function rightPad(string, len, padchar) {
@@ -64,7 +66,7 @@ function leftPad (string, len, padchar) {
     return newString;
 }
 
-function  customerInput () {
+function  customerSelect () {
     inquirer.prompt([{
         type: 'number',
         name: 'item_num',
@@ -84,8 +86,31 @@ function  customerInput () {
     .then( function (r) {
         let id = r.item_num;
         let qty = r.item_qty;
-        console.log(id,qty);
+        //console.log(id,qty);
+        fillOrder(id, qty);
     });
 }
 
-showAllItems();
+function fillOrder(itemId, itemQty) {
+    let querySQL = `select stock_quantity, price from products where item_id = ${itemId}`;
+    connection.query(querySQL, (e,r) => {
+        if(e) throw e;
+        inStock = r[0].stock_quantity;
+        itemPrice = r[0].price;
+        if (inStock < itemQty) {
+            console.log (`Insufficient inventory to complete order.\nYou wanted to purchase ${itemQty}, but we only have ${inStock}\n`);
+        } else {
+            let newQty = inStock - itemQty;
+            let totalCost = itemQty * itemPrice;
+            let updateSQL = `update products set stock_quantity = ${newQty} where item_id = ${itemId}`;
+            connection.query(updateSQL, (err, res) => {
+                if (err) throw err;
+                console.log(`Your order is complete\nThe total cost of your order was ${totalCost.toFixed(2)}\n`);
+            });
+        }
+        closeConnection();
+    });
+
+}
+
+
