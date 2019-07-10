@@ -27,7 +27,7 @@ function managerOptions() {
             {name:'Exit', value:'exit'}
         ]
     }).then( (r) => {
-        console.log(r);
+        // console.log(r);
         switch (r.selectedAction) {
             case 'viewProd':
                 viewProducts();
@@ -113,8 +113,8 @@ function addInventory () {
             }
             inventory.push(record);
         }
-        console.log(inventory);
-        inquirer.prompt([
+        // console.log(inventory);
+        inquirer.prompt([ // user selects the item and amount to restock
             {
             type: 'list',
             name: 'selectedItem',
@@ -125,13 +125,18 @@ function addInventory () {
             name: 'addQty',
             message: 'Enter the amount to restock',
             validate: (addQty) => {
-                return Number.isInteger(addQty) ? true : 'Enter a whole number';
+                return Number.isInteger(addQty) && addQty > 0 ? true : 'Enter a whole number';
                 }
             }
-            ]). then ( (r) => {
-            console.log(r);
-
-            managerOptions();
+            ]). then ( (a) => {
+            // console.log(a);
+            let updateSQL = `update products set stock_quantity = stock_quantity + ${a.addQty} where item_id = ${a.selectedItem}` // update database
+            connection.query(updateSQL, (e) => {
+                if (e) throw e;
+                console.log ('\nAdded to inventory\n');
+                managerOptions();
+            });
+            
         });
     });
 }
