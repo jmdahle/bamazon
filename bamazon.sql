@@ -14,15 +14,15 @@ create table products (
 
 insert into products (product_name, department_name, price, stock_quantity)
 values
-    ('widget', 'general', 14.99, 12),
-    ('thingamajiggy', 'general', 12.49, 10),
-    ('whats-its', 'sports', 9.99, 45),
-    ('doodads', 'sports', 12.49, 6),
-    ('toothpaste', 'home', 4.99, 45),
-    ('toothbrush', 'home', 8.99, 24),
-    ('dental floss', 'home', 2.99, 20),
-    ('mouthwash', 'home', 15.99, 12),
-    ('bar soap', 'home', 8.99, 23),
-    ('bath towel', 'home', 12.99, 10);
+    ('Widget', 'general', 14.99, 12),
+    ('Thingamajiggy', 'general', 12.49, 10),
+    ('Whats-its', 'sports', 9.99, 45),
+    ('Doodads', 'sports', 12.49, 6),
+    ('Toothpaste', 'home', 4.99, 5),
+    ('Toothbrush', 'home', 8.99, 2),
+    ('Dental floss', 'home', 2.99, 20),
+    ('Mouthwash', 'home', 15.99, 12),
+    ('Bar soap', 'home', 8.99, 23),
+    ('Bath towel', 'home', 12.99, 10);
 
 select * from products;

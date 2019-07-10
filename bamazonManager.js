@@ -39,6 +39,7 @@ function managerOptions() {
                 addInventory();
                 break;
             case 'addNew':
+                addNewItem();
                 break;
             case 'exit':
                 exitProgram();
@@ -101,7 +102,6 @@ function displayProductTable(title, r) {
 }
 
 function addInventory () {
-    // update db
     let inventory = []; // load the array of choices and current inventory
     let querySQL = 'select item_id, product_name, stock_quantity from products';
     connection.query(querySQL, (e,r) => {
@@ -135,9 +135,48 @@ function addInventory () {
                 if (e) throw e;
                 console.log ('\nAdded to inventory\n');
                 managerOptions();
-            });
-            
+            });       
         });
+    });
+}
+
+function addNewItem() {
+    // insert new item into DB
+    inquirer.prompt([  // user enters new item: product_name, department, price, stock_quantity
+        {
+            type: 'input',
+            name: 'newProductName',
+            message: 'Enter the new product name'
+        },
+        {
+            type: 'list',
+            name: 'newProductDepartment',
+            choices: ['general', 'home', 'sports', 'electronics'],
+            message: 'Select the department'
+        },
+        {
+            type: 'number',
+            name: 'newProductPrice',
+            message: 'Enter the purchase price',
+            validate: (newProductPrice) => {
+                return !Number.isNaN(newProductPrice) && newProductPrice > 0 ? true : 'Enter a number';
+            }
+        },
+        {
+            type: 'number',
+            name: 'newProductQuantity',
+            message: 'Enter the initial stock (quantity)',
+            validate: (newProductQuantity) => {
+                return Number.isInteger(newProductQuantity) && newProductQuantity > 0 ? true : 'Enter a whole number';
+            }
+        }
+    ]).then ( (a) => {
+        let insertSQL = `INSERT into products (product_name, department_name, price, stock_quantity) VALUES ('${a.newProductName}', '${a.newProductDepartment}', ${a.newProductPrice}, ${a.newProductQuantity})`; //insert new item into database
+        connection.query(insertSQL, (e) => {
+            if (e) throw e;
+            console.log(`\nAdded ${a.newProductQuantity} of ${a.newProductName} in the ${a.newProductDepartment} department priced at ${a.newProductPrice.toFixed(2)}\n`);
+            managerOptions();
+        })
     });
 }
 
