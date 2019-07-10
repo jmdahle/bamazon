@@ -1,5 +1,6 @@
 const mysql = require('mysql');
 const inquirer = require('inquirer');
+const common = require('./common.js');
 
 const connection = mysql.createConnection({
     host: "localhost",  
@@ -11,19 +12,9 @@ const connection = mysql.createConnection({
 
 customerView();
 
-function openConnection() {
-    connection.connect(function(err) {
-        if (err) throw err;
-        // console.log("Connected as id " + connection.threadId);
-    });
-}
-
-function closeConnection() {
-    connection.end();
-}
 
 function customerView () {
-    openConnection();
+    common.openConnection(connection);
     let querySQL = 'SELECT item_id, product_name, price FROM products';
     connection.query(querySQL, (e, r) => {
         if (e) throw e;
@@ -31,39 +22,23 @@ function customerView () {
         // console.log(r);
         msg += '\nLIST OF PRODUCTS FOR SALE\n';
         msg += '=========================\n';
-        msg += rightPad('Item ID', 8, ' ');
-        msg += rightPad('Product', 60, ' ');
-        msg += leftPad('Price', 8, ' ');
+        msg += common.rightPad('Item ID', 8, ' ');
+        msg += common.rightPad('Product', 60, ' ');
+        msg += common.leftPad('Price', 8, ' ');
         msg += '\n';
-        msg += rightPad('', 76, '-');
+        msg += common.rightPad('', 76, '-');
         console.log(msg);
         for (let i = 0; i < r.length; i++) {
             msg = '';
-            msg += rightPad(r[i].item_id, 8, ' ');
-            msg += rightPad(r[i].product_name, 60, ' ');
-            msg += leftPad(r[i].price, 8, ' ');
+            msg += common.rightPad(r[i].item_id, 8, ' ');
+            msg += common.rightPad(r[i].product_name, 60, ' ');
+            msg += common.leftPad(r[i].price, 8, ' ');
             console.log (msg);
         }
         console.log('\n');
         customerSelect();
     });
     
-}
-
-function rightPad(string, len, padchar) {
-    len -= string.toString().length;
-    let emptyString = padchar.repeat(len);
-    let newString = string + emptyString;
-    //newString = newString.substring(0, len);
-    return newString;
-}
-
-function leftPad (string, len, padchar) {
-    len -= string.toString().length;
-    let emptyString = padchar.repeat(len);
-    let newString = emptyString + string;
-    // newString = newString.substring(0, len);
-    return newString;
 }
 
 function  customerSelect () {
@@ -108,7 +83,7 @@ function fillOrder(itemId, itemQty) {
                 console.log(`Your order is complete\nThe total cost of your order was ${totalCost.toFixed(2)}\n`);
             });
         }
-        closeConnection();
+        common.closeConnection(connection);
     });
 
 }
