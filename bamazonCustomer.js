@@ -1,7 +1,7 @@
 const mysql = require('mysql');
 const inquirer = require('inquirer');
 
-var connection = mysql.createConnection({
+const connection = mysql.createConnection({
     host: "localhost",  
     port: 3306, // Your port; if not 3306
     user: "jdahle", // Your username
@@ -83,7 +83,7 @@ function  customerSelect () {
         },
         message: `Enter the quantity you wish to purcahse`
     }])
-    .then( function (r) {
+    .then( (r) => {
         let id = r.item_num;
         let qty = r.item_qty;
         //console.log(id,qty);

@@ -17,7 +17,7 @@ values
     ('widget', 'general', 14.99, 12),
     ('thingamajiggy', 'general', 12.49, 10),
     ('whats-its', 'sports', 9.99, 45),
-    ('doodads', 'sports', 12.49, 4),
+    ('doodads', 'sports', 12.49, 6),
     ('toothpaste', 'home', 4.99, 45),
     ('toothbrush', 'home', 8.99, 24),
     ('dental floss', 'home', 2.99, 20),
