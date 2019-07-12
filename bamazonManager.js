@@ -141,6 +141,14 @@ function addInventory () {
 }
 
 function addNewItem() {
+    let departments = []; // load the array of choices and current inventory
+    let querySQL = 'select department_name from departments';
+    connection.query(querySQL, (e,r) => {
+        if (e) throw e;
+        for (let i = 0; i < r.length; i ++) {
+            departments.push(r[i].department_name);
+        }
+    });
     // insert new item into DB
     inquirer.prompt([  // user enters new item: product_name, department, price, stock_quantity
         {
@@ -151,7 +159,7 @@ function addNewItem() {
         {
             type: 'list',
             name: 'newProductDepartment',
-            choices: ['general', 'home', 'sports', 'electronics'],
+            choices: departments,
             message: 'Select the department'
         },
         {

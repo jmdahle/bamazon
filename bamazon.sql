@@ -26,3 +26,22 @@ values
     ('Bath towel', 'home', 12.99, 10);
 
 select * from products;
+
+create table departments (
+    department_id int not null auto_increment,
+    department_name varchar(50),
+    over_head_costs decimal(11,2) default 0,
+    primary key(department_id)
+);
+
+select * from departments;
+
+# populate departments with any departments from products
+insert into departments (department_name) select distinct department_name from products;
+
+select * from departments;
+
+# add product_sales to products table
+alter table products add column product_sales decimal (11,2) default 0;
+
+

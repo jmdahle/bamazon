@@ -77,7 +77,7 @@ function fillOrder(itemId, itemQty) {
         } else {
             let newQty = inStock - itemQty;
             let totalCost = itemQty * itemPrice;
-            let updateSQL = `update products set stock_quantity = ${newQty} where item_id = ${itemId}`;
+            let updateSQL = `update products set stock_quantity = ${newQty}, product_sales = product_sales + ${totalCost} where item_id = ${itemId}`;
             connection.query(updateSQL, (err, res) => {
                 if (err) throw err;
                 console.log(`Your order is complete\nThe total cost of your order was ${totalCost.toFixed(2)}\n`);
