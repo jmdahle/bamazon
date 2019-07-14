@@ -30,7 +30,7 @@ select * from products;
 create table departments (
     department_id int not null auto_increment,
     department_name varchar(50),
-    over_head_costs decimal(11,2) default 0,
+    over_head_costs decimal(11,2) default 10000,
     primary key(department_id)
 );
 
@@ -45,3 +45,12 @@ select * from departments;
 alter table products add column product_sales decimal (11,2) default 0;
 
 
+# test new department
+insert into departments (department_name, over_head_costs) values ('grocery', 10000);
+
+#test department sales
+select departments.department_id, departments.department_name, departments.over_head_costs, 
+	sum(ifnull(products.product_sales,0)) as total_sales, sum(ifnull(products.product_sales,0)) - over_head_costs as total_profit 
+    from departments left join products 
+		on departments.department_name = products.department_name 
+	group by department_id;

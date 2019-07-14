@@ -166,16 +166,16 @@ function addNewItem() {
             type: 'input',
             name: 'newProductPrice',
             message: 'Enter the purchase price',
-            validate: (testPrice) => {
-                return /^(\d*\.)?\d{0,2}$/.test(testPrice) && testPrice > 0 ? true : 'Enter a number, up to 2 decimals';
+            validate: (testPrice) => { // check for (up to) 2 digit decimal
+                return /^\d*(\.?\d{0,2})$/.test(testPrice) && testPrice > 0 ? true : 'Enter a positive number, up to 2 decimals';
             }
         },
         {
             type: 'input',
             name: 'newProductQuantity',
             message: 'Enter the initial stock (quantity)',
-            validate: (testQuantity) => {
-                return /^\d*$/.test(testQuantity) && testQuantity > 0 ?  true : 'Enter a whole number';
+            validate: (testQuantity) => { // check for an integer number > 0
+                return /^\d*$/.test(testQuantity) && testQuantity > 0 ?  true : 'Enter a whole number greater than zero';
             }
         }
     ]).then ( (a) => {

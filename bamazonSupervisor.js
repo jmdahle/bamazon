@@ -26,6 +26,10 @@ function supervisorOptions() {
                 {
                     name: 'Create New Department',
                     value: 'newDepartment'
+                },
+                {
+                    name: 'Exit',
+                    value: 'exitProgram'
                 }
             ]
         }
@@ -37,6 +41,8 @@ function supervisorOptions() {
             case 'newDepartment':
                 newDepartment();
                 break;
+            case 'exitProgram':
+                exitProgram();
             default:
                 break;
         }
@@ -44,7 +50,7 @@ function supervisorOptions() {
 }
 
 function viewSales() {
-    sql = 'select departments.department_id, departments.department_name, departments.over_head_costs, sum(products.product_sales) as total_sales, sum(products.product_sales) - over_head_costs as total_profit from departments inner join products on departments.department_name = products.department_name group by department_id;'
+    sql = 'select departments.department_id, departments.department_name, departments.over_head_costs, sum(ifnull(products.product_sales,0)) as total_sales, sum(ifnull(products.product_sales,0)) - over_head_costs as total_profit from departments LEFT join products on departments.department_name = products.department_name group by department_id;'  // ```LEFT``` join permits showing departments with no products; ```INNER``` join would exclude those; ```ifull(columnName,0)``` function replaces ```null``` value from columnName with ```0```
     connection.query(sql, (error, dataset) => {
         if (error) throw error;
         let title = 'SALES BY DEPARTMENT';
@@ -86,7 +92,6 @@ function displaySalesTable (title, dataset) {
 }
 
 function newDepartment() {
-    console.log('here');
     inquirer.prompt([
         {
             type: 'input',
@@ -94,16 +99,27 @@ function newDepartment() {
             message: 'Enter new department name'
         },
         {
-            type: 'number',
+            type: 'input',
             name: 'overHeadCosts',
-            messsage: 'Enter overhead cost',
-            validate: (overHeadCosts) => {
-                return !Number.isNaN(overHeadCosts) && overHeadCosts > 0 ? true : 'Enter a number';
+            message: 'Enter overhead cost',
+            validate: (testOverhead) => { // check for a (up to) 2 digit decimal
+                return /^\d*(\.?\d{0,2})$/.test(testOverhead) ? true : 'Enter a positive number, up to 2 decimals';
             }
         }
     ]).then ( (response) => {
-        let sql = `insert into departments ()`;
-        console.log (sql);
-        console.log(response);
+        let sql = `insert into departments (department_name, over_head_costs) values ('${response.departmentName}', ${response.overHeadCosts})`;
+        // console.log (sql);
+        // console.log(response);
+        connection.query(sql, (error) => {
+            if (error) throw error;
+            console.log(`Added new department ${response.departmentName} with overhead costs of ${response.overHeadCosts}.`);
+            console.log('\n');
+            supervisorOptions();
+        });
     });
+}
+
+function exitProgram() {
+    console.log ('\nGoodbye.\n');
+    common.closeConnection(connection);
 }
