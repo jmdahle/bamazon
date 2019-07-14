@@ -163,26 +163,26 @@ function addNewItem() {
             message: 'Select the department'
         },
         {
-            type: 'number',
+            type: 'input',
             name: 'newProductPrice',
             message: 'Enter the purchase price',
-            validate: (newProductPrice) => {
-                return !Number.isNaN(newProductPrice) && newProductPrice > 0 ? true : 'Enter a number';
+            validate: (testPrice) => {
+                return /^(\d*\.)?\d{0,2}$/.test(testPrice) && testPrice > 0 ? true : 'Enter a number, up to 2 decimals';
             }
         },
         {
-            type: 'number',
+            type: 'input',
             name: 'newProductQuantity',
             message: 'Enter the initial stock (quantity)',
-            validate: (newProductQuantity) => {
-                return Number.isInteger(newProductQuantity) && newProductQuantity > 0 ? true : 'Enter a whole number';
+            validate: (testQuantity) => {
+                return /^\d*$/.test(testQuantity) && testQuantity > 0 ?  true : 'Enter a whole number';
             }
         }
     ]).then ( (a) => {
         let insertSQL = `INSERT into products (product_name, department_name, price, stock_quantity) VALUES ('${a.newProductName}', '${a.newProductDepartment}', ${a.newProductPrice}, ${a.newProductQuantity})`; //insert new item into database
         connection.query(insertSQL, (e) => {
             if (e) throw e;
-            console.log(`\nAdded ${a.newProductQuantity} of ${a.newProductName} in the ${a.newProductDepartment} department priced at ${a.newProductPrice.toFixed(2)}\n`);
+            console.log(`\nAdded ${a.newProductQuantity} of ${a.newProductName} in the ${a.newProductDepartment} department priced at ${a.newProductPrice}\n`);
             managerOptions();
         })
     });
