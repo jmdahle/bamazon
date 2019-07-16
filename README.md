@@ -5,7 +5,7 @@ Bamazon is a command-line storefront where customers can view items for sale and
 
 Each role - Customer, Manager, and Supervisor - is provided through a separate JavaScript file using Node.js.
 
-See the [demo](LINK TO DEMO)
+See the [demo](https://drive.google.com/file/d/1IwHMu8Om9yEy1yXvGobTrT4L6lhoPu0G/view?usp=sharing)
 
 ## Installation
 Bamazon relies on Node.js to provide a command line interface to a MySql datbase.
