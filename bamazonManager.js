@@ -14,6 +14,10 @@ common.openConnection(connection);
 
 managerOptions();
 
+/**
+ * Function shows main menu for Manager role; based on choice, calls the proper function to execute
+ * 
+ */
 function managerOptions() {
     inquirer.prompt({
         type: 'list',
@@ -26,9 +30,9 @@ function managerOptions() {
             {name:'Add New Product', value:'addNew'},
             {name:'Exit', value:'exit'}
         ]
-    }).then( (r) => {
-        // console.log(r);
-        switch (r.selectedAction) {
+    }).then( (response) => {
+        // console.log(response);
+        switch (response.selectedAction) {
             case 'viewProd':
                 viewProducts();
                 break;
@@ -52,31 +56,45 @@ function managerOptions() {
     });
 }
 
+/**
+ * Function displays a table of items for sale (plus quantity)
+ * 
+ */
 function viewProducts () {
     let querySQL = 'SELECT item_id, product_name, price, stock_quantity FROM products';
-    connection.query(querySQL, (e, r) => {
-        if (e) throw e;
+    connection.query(querySQL, (err, res) => {
+        if (err) throw err;
         let title = 'LIST OF ALL PRODUCTS FOR SALE';
-        displayProductTable(title, r);
+        displayProductTable(title, res); // pass title and queryset to function that will print out information
         console.log('\n');
-        managerOptions();
+        managerOptions(); // return to main menu
     });
 }
 
+/**
+ * Function displays a table of items with stock less than 5
+ * 
+ */
 function viewLowInventory () {
     let querySQL = 'SELECT item_id, product_name, price, stock_quantity FROM products WHERE stock_quantity < 5';
-    connection.query(querySQL, (e,r) => {
-        if (e) throw e;
+    connection.query(querySQL, (err ,res) => {
+        if (err) throw err;
         let title = 'LIST OF PRODUCTS WITH LOW INVENTORY';
-        displayProductTable(title, r)
+        displayProductTable(title, res) // pass title and queryset to function that will print out information
         console.log('\n');
-        managerOptions();
+        managerOptions(); // return to main menu
     });
 }
 
-function displayProductTable(title, r) {
+/**
+ * Function prints table of items for sale
+ * 
+ * @param {string} title 
+ * @param {object} res
+ */
+function displayProductTable(title, res) {
     let msg = '';
-    // console.log(r);
+    // console.log(res);
     msg += `\n${title}\n`;
     msg += '='.repeat(title.length);
     msg += '\n';
@@ -87,13 +105,13 @@ function displayProductTable(title, r) {
     msg += '\n';
     msg += common.rightPad('', 76, '-');
     console.log(msg);
-    if (r.length > 0) {
-        for (let i = 0; i < r.length; i++) {
+    if (res.length > 0) {
+        for (let i = 0; i < res.length; i++) {
             msg = '';
-            msg += common.rightPad(r[i].item_id, 8, ' ');
-            msg += common.rightPad(r[i].product_name, 45, ' ');
-            msg += common.leftPad(r[i].stock_quantity, 15, ' ');
-            msg += common.leftPad(r[i].price, 8, ' ');
+            msg += common.rightPad(res[i].item_id, 8, ' ');
+            msg += common.rightPad(res[i].product_name, 45, ' ');
+            msg += common.leftPad(res[i].stock_quantity, 15, ' ');
+            msg += common.leftPad(res[i].price, 8, ' ');
             console.log (msg);
         }
     } else {
@@ -101,15 +119,19 @@ function displayProductTable(title, r) {
     }
 }
 
+/**
+ * Function prompts to select an item to restock and then asks for the quantituy to add to inventory; then the function updates the database and adds the indicated number to stock
+ * 
+ */
 function addInventory () {
     let inventory = []; // load the array of choices and current inventory
     let querySQL = 'select item_id, product_name, stock_quantity from products';
-    connection.query(querySQL, (e,r) => {
-        if (e) throw e;
-        for (let i = 0; i < r.length; i ++) {
+    connection.query(querySQL, (error ,response) => {
+        if (error) throw error;
+        for (let i = 0; i < response.length; i ++) {
             let record = {
-                name: r[i].product_name,
-                value: r[i].item_id
+                name: response[i].product_name,
+                value: response[i].item_id
             }
             inventory.push(record);
         }
@@ -128,25 +150,28 @@ function addInventory () {
                 return (/^\d*$/.test(test_value) && test_value > 0) ?  true : 'Enter a whole number greater than zero';
                 }
             }
-            ]). then ( (a) => {
-            // console.log(a);
-            let updateSQL = `update products set stock_quantity = stock_quantity + ${a.addQty} where item_id = ${a.selectedItem}` // update database
-            connection.query(updateSQL, (e) => {
-                if (e) throw e;
+            ]). then ( (answers) => { // update the database
+            // console.log(answers);
+            let updateSQL = `update products set stock_quantity = stock_quantity + ${answers.addQty} where item_id = ${answers.selectedItem}` // update database
+            connection.query(updateSQL, (err) => {
+                if (err) throw err;
                 console.log ('\nAdded to inventory\n');
-                managerOptions();
+                managerOptions(); //return to main menu
             });       
         });
     });
 }
 
+/**
+ * Function adds a new item to the databse; user is prompted for values that are added to db
+ */
 function addNewItem() {
     let departments = []; // load the array of choices and current inventory
     let querySQL = 'select department_name from departments';
-    connection.query(querySQL, (e,r) => {
-        if (e) throw e;
-        for (let i = 0; i < r.length; i ++) {
-            departments.push(r[i].department_name);
+    connection.query(querySQL, (err, res) => {
+        if (err) throw err;
+        for (let i = 0; i < res.length; i ++) {
+            departments.push(res[i].department_name);
         }
     });
     // insert new item into DB
@@ -178,16 +203,19 @@ function addNewItem() {
                 return /^\d*$/.test(testQuantity) && testQuantity > 0 ?  true : 'Enter a whole number greater than zero';
             }
         }
-    ]).then ( (a) => {
-        let insertSQL = `INSERT into products (product_name, department_name, price, stock_quantity) VALUES ('${a.newProductName}', '${a.newProductDepartment}', ${a.newProductPrice}, ${a.newProductQuantity})`; //insert new item into database
-        connection.query(insertSQL, (e) => {
-            if (e) throw e;
-            console.log(`\nAdded ${a.newProductQuantity} of ${a.newProductName} in the ${a.newProductDepartment} department priced at ${a.newProductPrice}\n`);
-            managerOptions();
+    ]).then ( (answers) => {
+        let insertSQL = `INSERT into products (product_name, department_name, price, stock_quantity) VALUES ('${answers.newProductName}', '${answers.newProductDepartment}', ${answers.newProductPrice}, ${answers.newProductQuantity})`; //insert new item into database
+        connection.query(insertSQL, (err) => {
+            if (err) throw err;
+            console.log(`\nAdded ${answers.newProductQuantity} of ${answers.newProductName} in the ${answers.newProductDepartment} department priced at ${answers.newProductPrice}\n`);
+            managerOptions(); // return to main menu
         })
     });
 }
 
+/**
+ * Function closes database connection in preparation of ending program
+ */
 function exitProgram () {
     console.log ('\nGoodbye.\n');
     common.closeConnection(connection);

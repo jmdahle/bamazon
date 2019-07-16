@@ -12,7 +12,9 @@ const connection = mysql.createConnection({
 
 customerView();
 
-
+/**
+ * Function displays the products for sale to the Customer
+ */
 function customerView () {
     common.openConnection(connection);
     let querySQL = 'SELECT item_id, product_name, price FROM products where stock_quantity > 0';  // exclude from "where" to premit out-of-stock items
@@ -41,6 +43,10 @@ function customerView () {
     
 }
 
+/**
+ * Function prompts Customer for purchase (item + quantity)
+ * 
+ */
 function  customerSelect () {
     inquirer.prompt([
         {
@@ -68,16 +74,22 @@ function  customerSelect () {
     });
 }
 
+/**
+ * Function checks inventory for the desired quantity; if there is, function removes the items from inventory and updates total sales for product
+ * 
+ * @param {int} itemId 
+ * @param {int} itemQty 
+ */
 function fillOrder(itemId, itemQty) {
     let querySQL = `select stock_quantity, price from products where item_id = ${itemId}`;
-    connection.query(querySQL, (error,result) => {
+    connection.query(querySQL, (error,result) => { // check quamtity in inventory
         if (error) throw error;
         if (result.length) {
             inStock = result[0].stock_quantity;
             itemPrice = result[0].price;
-            if (inStock < itemQty) {
+            if (inStock < itemQty) {  // notify Customer of insufficient stock and end without completing order
                 console.log (`Insufficient inventory to complete order.\nYou wanted to purchase ${itemQty}, but we only have ${inStock}\n`);
-            } else {
+            } else { // complete order; reduce stock and update total sales
                 let newQty = inStock - itemQty;
                 let totalCost = itemQty * itemPrice;
                 let updateSQL = `update products set stock_quantity = ${newQty}, product_sales = product_sales + ${totalCost} where item_id = ${itemId}`;
@@ -86,7 +98,7 @@ function fillOrder(itemId, itemQty) {
                     console.log(`Your order is complete\nThe total cost of your order was ${totalCost.toFixed(2)}\n`);
                 });
             }
-        } else {
+        } else { // if no record returned
             console.log (`No items match the Item ID ${itemId}`);
         }
         common.closeConnection(connection);

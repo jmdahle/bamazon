@@ -12,6 +12,9 @@ const connection = mysql.createConnection({
 
 supervisorOptions()
 
+/**
+ * Function presents main menu of options to Supervisor and calls the proper function based on the selection
+ */
 function supervisorOptions() {
     inquirer.prompt([
         {
@@ -49,17 +52,27 @@ function supervisorOptions() {
     });
 }
 
+/**
+ * Function displays departments, overhead, total sales and calculated total net profit
+ * 
+ */
 function viewSales() {
     sql = 'select departments.department_id, departments.department_name, departments.over_head_costs, sum(ifnull(products.product_sales,0)) as total_sales, sum(ifnull(products.product_sales,0)) - over_head_costs as total_profit from departments LEFT join products on departments.department_name = products.department_name group by department_id;'  // ```LEFT``` join permits showing departments with no products; ```INNER``` join would exclude those; ```ifull(columnName,0)``` function replaces ```null``` value from columnName with ```0```
     connection.query(sql, (error, dataset) => {
         if (error) throw error;
         let title = 'SALES BY DEPARTMENT';
-        displaySalesTable(title, dataset);
+        displaySalesTable(title, dataset); // calls function to print queryset
         console.log('\n');
-        supervisorOptions();
+        supervisorOptions();  // back to main menu
     });
 }
 
+/**
+ * Function prints querset results into a table on the console.
+ * 
+ * @param {string} title 
+ * @param {object} dataset 
+ */
 function displaySalesTable (title, dataset) {
     let msg = '';
     //console.log(dataset);
@@ -102,7 +115,10 @@ function formatNumber(num) {
     return num.toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
   }
   
-
+/**
+ * Function prompts for new department information and inserts a new department into the database
+ * 
+ */
 function newDepartment() {
     inquirer.prompt([
         {
@@ -129,11 +145,15 @@ function newDepartment() {
             if (error) throw error;
             console.log(`Added new department ${response.departmentName} with overhead costs of ${response.overHeadCosts}.`);
             console.log('\n');
-            supervisorOptions();
+            supervisorOptions();  // return to main menu
         });
     });
 }
 
+/**
+ * Function closes database connection and exits
+ * 
+ */
 function exitProgram() {
     console.log ('\nGoodbye.\n');
     common.closeConnection(connection);
