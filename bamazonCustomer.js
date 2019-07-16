@@ -15,11 +15,11 @@ customerView();
 
 function customerView () {
     common.openConnection(connection);
-    let querySQL = 'SELECT item_id, product_name, price FROM products';
-    connection.query(querySQL, (e, r) => {
-        if (e) throw e;
-        let msg = '';
-        // console.log(r);
+    let querySQL = 'SELECT item_id, product_name, price FROM products where stock_quantity > 0';  // exclude from "where" to premit out-of-stock items
+    connection.query(querySQL, (error, result) => {
+        if (error) throw error;
+        let msg = ''; 
+        // console.log(result);
         msg += '\nLIST OF PRODUCTS FOR SALE\n';
         msg += '=========================\n';
         msg += common.rightPad('Item ID', 8, ' ');
@@ -28,11 +28,11 @@ function customerView () {
         msg += '\n';
         msg += common.rightPad('', 76, '-');
         console.log(msg);
-        for (let i = 0; i < r.length; i++) {
+        for (let i = 0; i < result.length; i++) {
             msg = '';
-            msg += common.rightPad(r[i].item_id, 8, ' ');
-            msg += common.rightPad(r[i].product_name, 60, ' ');
-            msg += common.leftPad(r[i].price, 8, ' ');
+            msg += common.rightPad(result[i].item_id, 8, ' ');
+            msg += common.rightPad(result[i].product_name, 60, ' ');
+            msg += common.leftPad(result[i].price, 8, ' ');
             console.log (msg);
         }
         console.log('\n');
@@ -42,25 +42,27 @@ function customerView () {
 }
 
 function  customerSelect () {
-    inquirer.prompt([{
-        type: 'number',
+    inquirer.prompt([
+        {
+        type: 'input',
         name: 'item_num',
-        validate: (item_num) => {
-            return Number.isInteger(item_num) ? true : 'Enter a whole number';
+        validate: (test_value) => { // check for an integer number > 0
+            return (/^\d*$/.test(test_value) && test_value > 0) ?  true : 'Enter a whole number greater than zero';
+            },
+        message: 'Enter the Item ID (# above) of the product you wish to purchase'
         },
-        message: 'Enter the Item ID (# above) of the product you wish to purcahse'
-    },
-    {
-        type: 'number',
+        {
+        type: 'input',
         name: 'item_qty',
-        validate: (item_qty) => {
-            return Number.isInteger(item_qty) ? true : 'Enter a whole number';
-        },
+        validate: (test_value) => { // check for an integer number > 0
+            return (/^\d*$/.test(test_value) && test_value > 0) ?  true : 'Enter a whole number from the list above.';
+            },
         message: `Enter the quantity you wish to purcahse`
-    }])
-    .then( (r) => {
-        let id = r.item_num;
-        let qty = r.item_qty;
+        }
+    ])
+    .then( (result) => {
+        let id = result.item_num;
+        let qty = result.item_qty;
         //console.log(id,qty);
         fillOrder(id, qty);
     });
@@ -68,20 +70,24 @@ function  customerSelect () {
 
 function fillOrder(itemId, itemQty) {
     let querySQL = `select stock_quantity, price from products where item_id = ${itemId}`;
-    connection.query(querySQL, (e,r) => {
-        if(e) throw e;
-        inStock = r[0].stock_quantity;
-        itemPrice = r[0].price;
-        if (inStock < itemQty) {
-            console.log (`Insufficient inventory to complete order.\nYou wanted to purchase ${itemQty}, but we only have ${inStock}\n`);
+    connection.query(querySQL, (error,result) => {
+        if (error) throw error;
+        if (result.length) {
+            inStock = result[0].stock_quantity;
+            itemPrice = result[0].price;
+            if (inStock < itemQty) {
+                console.log (`Insufficient inventory to complete order.\nYou wanted to purchase ${itemQty}, but we only have ${inStock}\n`);
+            } else {
+                let newQty = inStock - itemQty;
+                let totalCost = itemQty * itemPrice;
+                let updateSQL = `update products set stock_quantity = ${newQty}, product_sales = product_sales + ${totalCost} where item_id = ${itemId}`;
+                connection.query(updateSQL, (err, res) => {
+                    if (err) throw err;
+                    console.log(`Your order is complete\nThe total cost of your order was ${totalCost.toFixed(2)}\n`);
+                });
+            }
         } else {
-            let newQty = inStock - itemQty;
-            let totalCost = itemQty * itemPrice;
-            let updateSQL = `update products set stock_quantity = ${newQty}, product_sales = product_sales + ${totalCost} where item_id = ${itemId}`;
-            connection.query(updateSQL, (err, res) => {
-                if (err) throw err;
-                console.log(`Your order is complete\nThe total cost of your order was ${totalCost.toFixed(2)}\n`);
-            });
+            console.log (`No items match the Item ID ${itemId}`);
         }
         common.closeConnection(connection);
     });

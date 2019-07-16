@@ -62,7 +62,8 @@ function viewSales() {
 
 function displaySalesTable (title, dataset) {
     let msg = '';
-    console.log(dataset);
+    //console.log(dataset);
+    /* Print Headings */
     msg += `\n${title}\n`;
     msg += '='.repeat(title.length);
     msg += '\n';
@@ -70,19 +71,20 @@ function displaySalesTable (title, dataset) {
     msg += common.rightPad('Department', 20, ' ');
     msg += common.leftPad('Overhead_$', 15, ' ');
     msg += common.leftPad('Sales_$', 15, ' ');
-    msg += common.leftPad('Total_$ ', 15, ' ');
+    msg += common.leftPad('NetProfit_$ ', 15, ' ');
 
     msg += '\n';
     msg += common.rightPad('', 76, '-');
     console.log(msg);
+    /* Print Body/Table */
     if (dataset.length > 0) {
         for (let i = 0; i < dataset.length; i++) {
             msg = '';
             msg += common.rightPad(dataset[i].department_id, 8, ' ');
             msg += common.rightPad(dataset[i].department_name, 20, ' ');
-            msg += common.leftPad(dataset[i].over_head_costs, 15, ' ');
-            msg += common.leftPad(dataset[i].total_sales, 15, ' ');
-            msg += common.leftPad(dataset[i].total_profit, 15, ' ');
+            msg += common.leftPad(formatNumber(dataset[i].over_head_costs), 15, ' ');
+            msg += common.leftPad(formatNumber(dataset[i].total_sales), 15, ' ');
+            msg += common.leftPad(formatNumber(dataset[i].total_profit), 15, ' ');
             console.log (msg);
         }
     } else {
@@ -91,19 +93,32 @@ function displaySalesTable (title, dataset) {
 
 }
 
+/**
+ * function converts deimal number wtih 2 digigts and thousand's separator ","
+ * found at https://blog.abelotech.com/posts/number-currency-formatting-javascript/
+ * @decimal {*} num 
+ */
+function formatNumber(num) {
+    return num.toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+  }
+  
+
 function newDepartment() {
     inquirer.prompt([
         {
             type: 'input',
             name: 'departmentName',
-            message: 'Enter new department name'
+            message: 'Enter new department name',
+            validate: (test_name) => { // check for not null
+                    return (test_name.length) ? true : 'NULL not permitted';
+                }
         },
         {
             type: 'input',
             name: 'overHeadCosts',
             message: 'Enter overhead cost',
             validate: (testOverhead) => { // check for a (up to) 2 digit decimal
-                return /^\d*(\.?\d{0,2})$/.test(testOverhead) ? true : 'Enter a positive number, up to 2 decimals';
+                return /^\d*(\.?\d{0,2})$/.test(testOverhead) ? true : 'Enter a non-negative number, up to 2 decimals';
             }
         }
     ]).then ( (response) => {

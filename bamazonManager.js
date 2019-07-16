@@ -121,11 +121,11 @@ function addInventory () {
             message: 'Choose an item to restock',
             choices: inventory
             }, {
-            type: 'number',
+            type: 'input',
             name: 'addQty',
             message: 'Enter the amount to restock',
-            validate: (addQty) => {
-                return Number.isInteger(addQty) && addQty > 0 ? true : 'Enter a whole number';
+            validate: (test_value) => { // check for an integer number > 0
+                return (/^\d*$/.test(test_value) && test_value > 0) ?  true : 'Enter a whole number greater than zero';
                 }
             }
             ]). then ( (a) => {
@@ -167,7 +167,7 @@ function addNewItem() {
             name: 'newProductPrice',
             message: 'Enter the purchase price',
             validate: (testPrice) => { // check for (up to) 2 digit decimal
-                return /^\d*(\.?\d{0,2})$/.test(testPrice) && testPrice > 0 ? true : 'Enter a positive number, up to 2 decimals';
+                return /^\d*(\.?\d{0,2})$/.test(testPrice) && testPrice > 0 ? true : 'Enter a non-negative number, up to 2 decimals';
             }
         },
         {
