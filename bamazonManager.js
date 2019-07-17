@@ -11,6 +11,7 @@ const connection = mysql.createConnection({
 });
 
 common.openConnection(connection);
+//function displayProductTable(title, resultSet) = common.displayProductTable(title, resultSet);
 
 managerOptions();
 
@@ -65,7 +66,7 @@ function viewProducts () {
     connection.query(querySQL, (err, res) => {
         if (err) throw err;
         let title = 'LIST OF ALL PRODUCTS FOR SALE';
-        displayProductTable(title, res); // pass title and queryset to function that will print out information
+        common.displayProductTable(title, res); // pass title and queryset to function that will print out information
         console.log('\n');
         managerOptions(); // return to main menu
     });
@@ -80,44 +81,12 @@ function viewLowInventory () {
     connection.query(querySQL, (err ,res) => {
         if (err) throw err;
         let title = 'LIST OF PRODUCTS WITH LOW INVENTORY';
-        displayProductTable(title, res) // pass title and queryset to function that will print out information
+        common.displayProductTable(title, res) // pass title and queryset to function that will print out information
         console.log('\n');
         managerOptions(); // return to main menu
     });
 }
 
-/**
- * Function prints table of items for sale
- * 
- * @param {string} title 
- * @param {object} res
- */
-function displayProductTable(title, res) {
-    let msg = '';
-    // console.log(res);
-    msg += `\n${title}\n`;
-    msg += '='.repeat(title.length);
-    msg += '\n';
-    msg += common.rightPad('Item ID', 8, ' ');
-    msg += common.rightPad('Product', 45, ' ');
-    msg += common.leftPad('Quantity', 15, ' ');
-    msg += common.leftPad('Price', 8, ' ');
-    msg += '\n';
-    msg += common.rightPad('', 76, '-');
-    console.log(msg);
-    if (res.length > 0) {
-        for (let i = 0; i < res.length; i++) {
-            msg = '';
-            msg += common.rightPad(res[i].item_id, 8, ' ');
-            msg += common.rightPad(res[i].product_name, 45, ' ');
-            msg += common.leftPad(res[i].stock_quantity, 15, ' ');
-            msg += common.leftPad(res[i].price, 8, ' ');
-            console.log (msg);
-        }
-    } else {
-        console.log(`No records found`);
-    }
-}
 
 /**
  * Function prompts to select an item to restock and then asks for the quantituy to add to inventory; then the function updates the database and adds the indicated number to stock

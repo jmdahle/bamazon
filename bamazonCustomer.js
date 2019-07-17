@@ -17,26 +17,12 @@ customerView();
  */
 function customerView () {
     common.openConnection(connection);
-    let querySQL = 'SELECT item_id, product_name, price FROM products where stock_quantity > 0';  // exclude from "where" to premit out-of-stock items
+    let querySQL = 'SELECT item_id, product_name, stock_quantity, price FROM products where stock_quantity > 0';  // exclude from "where" to premit out-of-stock items
     connection.query(querySQL, (error, result) => {
         if (error) throw error;
         let msg = ''; 
-        // console.log(result);
-        msg += '\nLIST OF PRODUCTS FOR SALE\n';
-        msg += '=========================\n';
-        msg += common.rightPad('Item ID', 8, ' ');
-        msg += common.rightPad('Product', 60, ' ');
-        msg += common.leftPad('Price', 8, ' ');
-        msg += '\n';
-        msg += common.rightPad('', 76, '-');
-        console.log(msg);
-        for (let i = 0; i < result.length; i++) {
-            msg = '';
-            msg += common.rightPad(result[i].item_id, 8, ' ');
-            msg += common.rightPad(result[i].product_name, 60, ' ');
-            msg += common.leftPad(result[i].price, 8, ' ');
-            console.log (msg);
-        }
+        let title = 'LIST OF PRODUCTS FOR SALE';
+        common.displayProductTable(title, result) // pass title and queryset to function that will print out information
         console.log('\n');
         customerSelect();
     });
