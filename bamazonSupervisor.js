@@ -131,14 +131,23 @@ function newDepartment() {
             }
         }
     ]).then ( (response) => {
-        let sql = `insert into departments (department_name, over_head_costs) values ('${response.departmentName}', ${response.overHeadCosts})`;
-        // console.log (sql);
-        // console.log(response);
-        connection.query(sql, (error) => {
-            if (error) throw error;
-            console.log(`Added new department ${response.departmentName} with overhead costs of ${response.overHeadCosts}.`);
-            console.log('\n');
-            supervisorOptions();  // return to main menu
+        let checkUnique = `select * from departments where lower(department_name) = '${response.departmentName.toLowerCase()}'`;
+        connection.query(checkUnique, (err, res) => {
+            if (err) throw err;
+            if (res.length > 0) { // department is a duplicate
+                console.log(`\nDepartment named ${response.departmentName} already exists.\n\n`);
+                supervisorOptions();  // return to main menu
+            } else {  // department is unique
+                let sql = `insert into departments (department_name, over_head_costs) values ('${response.departmentName}', ${response.overHeadCosts})`;
+                // console.log (sql);
+                // console.log(response);
+                connection.query(sql, (error) => {
+                    if (error) throw error;
+                    console.log(`\nAdded new department ${response.departmentName} with overhead costs of ${response.overHeadCosts}.`);
+                    console.log('\n');
+                    supervisorOptions();  // return to main menu
+                });
+            };
         });
     });
 }

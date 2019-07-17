@@ -16,7 +16,18 @@ Bamazon relies on Node.js to provide a command line interface to a MySql datbase
 4. Use the Node.js package manager - npm - to install the required Node.js packages.  Running ```npm install``` from the command line will install the following Node.js packages:
     * [mysql](https://www.npmjs.com/package/mysql)
     * [inquirer](https://www.npmjs.com/package/inquirer)
+    * [dotenv](https://www.npmjs.com/package/dotenv)
 
+The 'dotenv' package is used for database credentials.  You will need to supply a ```.env``` file with the following information, accessed by the ```common.js``` file.
+
+```bash
+    # database user credentials
+    HOST=yourDBhost
+    PORT=yourDBport
+    DATABASE=bamazon
+    USER=yourDBuser
+    PASSWORD=yourDBpassword
+```
 
 ## Usage
 Bamazon is run from the command line.  The command issued depents on the role - Customer, Manager, or Supervisor.

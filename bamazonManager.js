@@ -165,12 +165,21 @@ function addNewItem() {
             }
         }
     ]).then ( (answers) => {
-        let insertSQL = `INSERT into products (product_name, department_name, price, stock_quantity) VALUES ('${answers.newProductName}', '${answers.newProductDepartment}', ${answers.newProductPrice}, ${answers.newProductQuantity})`; //insert new item into database
-        connection.query(insertSQL, (err) => {
-            if (err) throw err;
-            console.log(`\nAdded ${answers.newProductQuantity} of ${answers.newProductName} in the ${answers.newProductDepartment} department priced at ${answers.newProductPrice}\n`);
-            managerOptions(); // return to main menu
-        })
+        let checkUnique = `SELECT * from products where lower(product_name) = '${answers.newProductName.toLowerCase()}'`;
+        connection.query(checkUnique, (error, result) => {
+            if (error) throw error;
+            if (result.length > 0) { // avoid duplicate product
+                console.log(`\nThe product ${answers.newProductName} already exists.\n\n`);
+                managerOptions(); // return to main menu
+            } else { // product name is unique
+                let insertSQL = `INSERT into products (product_name, department_name, price, stock_quantity) VALUES ('${answers.newProductName}', '${answers.newProductDepartment}', ${answers.newProductPrice}, ${answers.newProductQuantity})`; //insert new item into database
+                connection.query(insertSQL, (err) => {
+                    if (err) throw err;
+                    console.log(`\nAdded ${answers.newProductQuantity} of ${answers.newProductName} in the ${answers.newProductDepartment} department priced at ${answers.newProductPrice}\n`);
+                    managerOptions(); // return to main menu
+                });        
+            }
+        });
     });
 }
 
