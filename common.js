@@ -1,3 +1,18 @@
+require('dotenv').config();
+const mysql = require('mysql');
+
+
+exports.createConnection = function () {
+    return mysql.createConnection({
+        host: process.env.HOST,  
+        port: process.env.PORT,
+        user: process.env.USER,
+        password: process.env.PASSWORD,
+        database: process.env.DATABASE
+    });
+}
+
+
 exports.openConnection = function (connection) {
     connection.connect(function(err) {
         if (err) throw err;

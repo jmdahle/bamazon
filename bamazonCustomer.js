@@ -1,14 +1,14 @@
-const mysql = require('mysql');
 const inquirer = require('inquirer');
 const common = require('./common.js');
 
-const connection = mysql.createConnection({
-    host: "localhost",  
-    port: 3306, // Your port; if not 3306
-    user: "jdahle", // Your username
-    password: "JD@mbpsql5494", // Your password
-    database: "bamazon"
-});
+const connection = common.createConnection();
+// mysql.createConnection({
+//     host: "localhost",  
+//     port: 3306, // Your port; if not 3306
+//     user: "jdahle", // Your username
+//     password: "JD@mbpsql5494", // Your password
+//     database: "bamazon"
+// });
 
 customerView();
 
